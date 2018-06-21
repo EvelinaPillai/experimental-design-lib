@@ -289,7 +289,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       beans.addAll(level);
     return beans;
   }
-  
 
   private String checkOrAddChecksum(String code) {
     if (code.length() < 9 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code)
@@ -303,7 +302,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       return prefix + main + SampleCodeFunctions.checksum(code);
     }
   }
-
 
   private String trySplitMetadata(String line, String keyword) {
     try {
@@ -406,11 +404,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
     return true;
   }
 
-  private static boolean isEntity(String code) {
-    String pattern = "Q[A-Z0-9]{4}ENTITY-[0-9]+";
-    return code.matches(pattern);
-  }
-
 	//TODO check if everything is fine
 	private static boolean isEntity(String code) {
 		//String pattern = "Q[A-Z0-9]{4}ENTITY-[0-9]+";
@@ -434,7 +427,7 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 		return code.matches(pattern1) || code.matches(pattern2);
 	}
 
-private HashMap<String, Object> fillMetadata(String[] header, String[] data, List<Integer> meta,
+  private HashMap<String, Object> fillMetadata(String[] header, String[] data, List<Integer> meta,
       List<Integer> factors, List<Integer> loci) {
     HashMap<String, Object> res = new HashMap<String, Object>();
     for (int i : meta) {
@@ -466,7 +459,7 @@ private HashMap<String, Object> fillMetadata(String[] header, String[] data, Lis
     }
     return res;
   }
-  
+
   private String unitCheck(String string) {
     String[] split = string.split(":");
     if (split.length > 2)
