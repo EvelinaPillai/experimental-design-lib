@@ -2,6 +2,7 @@ package life.qbic.expdesign.io;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ import life.qbic.datamodel.samples.ISampleBean;
 import life.qbic.datamodel.samples.SampleSummary;
 import life.qbic.datamodel.samples.TSVSampleBean;
 import life.qbic.expdesign.ParserHelpers;
+import life.qbic.expdesign.SamplePreparator;
+import life.qbic.expdesign.model.ExperimentalDesignType;
 import life.qbic.xml.manager.XMLParser;
 import life.qbic.xml.properties.Property;
 import life.qbic.xml.properties.PropertyType;
@@ -41,8 +44,6 @@ public class EasyDesignReader implements IExperimentalDesignReader {
   private Set<String> analyteSet;
   private List<String> tsvByRows;
 
-  // private Map<String, Integer> idCounterPerLabel;
-  // private Map<String, Map<TSVSampleBean, Set<SampleSummary>>> sampleToParentNodesPerLabel;
   private Map<String, Set<SampleSummary>> nodesForFactorPerLabel;
 
   public EasyDesignReader() {
@@ -73,19 +74,18 @@ public class EasyDesignReader implements IExperimentalDesignReader {
   public Map<String, List<Map<String, Object>>> getExperimentInfos() {
     return experimentInfos;
   }
-//
-//  public static void main(String[] args) throws JAXBException {
-//    try {
-//      SamplePreparator p = new SamplePreparator();
-//      p.processTSV(new File("import_bug.txt"),
-//          ExperimentalDesignType.Standard);
-//      System.out.println(p.getSummary());
-//      // System.out.println(p.getProcessed());
-//      System.out.println(p.getSampleGraph());
-//    } catch (IOException e) {
-//      e.printStackTrace();
-//    }
-//  }
+
+  public static void main(String[] args) throws JAXBException {
+    try {
+      SamplePreparator p = new SamplePreparator();
+      p.processTSV(new File("/Users/frieda/Downloads/BiglistTest.tsv"),
+          ExperimentalDesignType.Standard, false);
+      System.out.println(p.getSummary());
+      // System.out.println(p.getProcessed());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   public static final String UTF8_BOM = "\uFEFF";
 
@@ -96,20 +96,89 @@ public class EasyDesignReader implements IExperimentalDesignReader {
     return s;
   }
 
+  public int countEntities(File file) throws IOException {
+    Set<String> ids = new HashSet<String>();
+
+
+    nodesForFactorPerLabel = new HashMap<String, Set<SampleSummary>>();
+
+    tsvByRows = new ArrayList<String>();
+    BufferedReader reader = new BufferedReader(new FileReader(file));
+    ArrayList<String[]> data = new ArrayList<String[]>();
+    String next;
+    int i = 0;
+    // isPilot = false;
+    while ((next = reader.readLine()) != null) {
+      i++;
+      next = removeUTF8BOM(next);
+      tsvByRows.add(next);
+      String[] nextLine = next.split("\t", -1);// this is needed for trailing tabs
+      if (data.isEmpty() || nextLine.length == data.get(0).length) {
+        data.add(nextLine);
+      } else {
+        reader.close();
+        return -1;
+      }
+    }
+    reader.close();
+
+    String[] header = data.get(0);
+    data.remove(0);
+    // find out where the mandatory and other metadata data is
+    Map<String, Integer> headerMapping = new HashMap<String, Integer>();
+    List<Integer> meta = new ArrayList<Integer>();
+
+    ArrayList<String> found = new ArrayList<String>(Arrays.asList(header));
+    for (String col : mandatory) {
+      if (!found.contains(col)) {
+        return -1;
+      }
+    }
+    if (found.contains("Analyte") && found.contains("Analyte ID")) {
+      headerMapping.put("Analyte", found.indexOf("Analyte"));
+      headerMapping.put("Analyte ID", found.indexOf("Analyte ID"));
+      analytesIncluded = true;
+    } else if (!found.contains("Analyte") && !found.contains("Analyte ID"))
+      analytesIncluded = false;
+    else {
+      return -1;
+    }
+    for (i = 0; i < header.length; i++) {
+      int position = mandatory.indexOf(header[i]);
+      if (position > -1) {
+        headerMapping.put(header[i], i);
+        meta.add(i);
+      }
+    }
+    for (String[] row : data) {
+      String sourceID = row[headerMapping.get("Organism ID")];
+      String extractID = row[headerMapping.get("Extract ID")];
+      ids.add(sourceID);
+      ids.add(extractID);
+      String analyteID = "";
+      if (analytesIncluded) {
+        analyteID = row[headerMapping.get("Analyte ID")];
+        ids.add(analyteID);
+      }
+    }
+
+    return ids.size();
+  }
+
   /**
    * Reads in a TSV file containing samples that should be registered. Returns a List of
    * TSVSampleBeans containing all the necessary information to register each sample with its meta
    * information to openBIS, given that the types and parents exist.
    * 
    * @param file
+   * @param parseGraph
    * @return ArrayList of TSVSampleBeans
    * @throws IOException
    * @throws JAXBException
    */
-  public List<ISampleBean> readSamples(File file) throws IOException, JAXBException {
+  public List<ISampleBean> readSamples(File file, boolean parseGraph)
+      throws IOException, JAXBException {
 
-    // idCounterPerLabel = new HashMap<String, Integer>();
-    // sampleToParentNodesPerLabel = new HashMap<String, Map<TSVSampleBean, Set<SampleSummary>>>();
     nodesForFactorPerLabel = new HashMap<String, Set<SampleSummary>>();
 
     tsvByRows = new ArrayList<String>();
@@ -236,11 +305,13 @@ public class EasyDesignReader implements IExperimentalDesignReader {
       if (extr)
         extractFactors.add(col);
     }
-    for (int factorCol : factors) {
-      String label = parseXMLPartLabel(header[factorCol]);
-      nodesForFactorPerLabel.put(label, new LinkedHashSet<SampleSummary>());
+    if (parseGraph) {
+      for (int factorCol : factors) {
+        String label = parseXMLPartLabel(header[factorCol]);
+        nodesForFactorPerLabel.put(label, new LinkedHashSet<SampleSummary>());
+      }
+      nodesForFactorPerLabel.put("None", new LinkedHashSet<SampleSummary>());
     }
-    nodesForFactorPerLabel.put("None", new LinkedHashSet<SampleSummary>());
 
     // create samples
     List<ISampleBean> beans = new ArrayList<ISampleBean>();
@@ -253,7 +324,7 @@ public class EasyDesignReader implements IExperimentalDesignReader {
     Set<String> tissueSet = new HashSet<String>();
     Set<String> analyteSet = new HashSet<String>();
     int rowID = 0;
-    int sampleID = 0;
+    // int sampleID = 0;
     for (String[] row : data) {
       rowID++;
       // boolean special = false;
@@ -288,13 +359,12 @@ public class EasyDesignReader implements IExperimentalDesignReader {
       // if analyte is known, nothing needs to be done
       if (!analyteIDToSample.containsKey(analyteID)) {
         if (!analyteID.isEmpty()) {// some analytes can be added, while other cells can be empty
-          sampleID++;
-          TSVSampleBean firstASample =
-              new TSVSampleBean(Integer.toString(sampleID), "Q_TEST_SAMPLE", analyteID,
-                  fillMetadata(header, row, meta, factors, loci, "Q_TEST_SAMPLE"));
+          // sampleID++;
+          TSVSampleBean firstASample = new TSVSampleBean(analyteID, "Q_TEST_SAMPLE", analyteID,
+              fillMetadata(header, row, meta, factors, loci, "Q_TEST_SAMPLE"));
           firstASample.addProperty("Q_SAMPLE_TYPE", analyte);
           order.get(2).add(firstASample);
-          firstASample.addParent(extractID);
+          firstASample.addParentID(extractID);
           analyteIDToSample.put(analyteID, firstASample);
         }
 
@@ -302,28 +372,30 @@ public class EasyDesignReader implements IExperimentalDesignReader {
         TSVSampleBean eSample = extractIDToSample.get(extractID);
         TSVSampleBean sSample = sourceIDToSample.get(sourceID);
         if (!extractIDToSample.containsKey(extractID)) {
-          sampleID++;
-          eSample = new TSVSampleBean(Integer.toString(sampleID), "Q_BIOLOGICAL_SAMPLE", extractID,
+          // sampleID++;
+          eSample = new TSVSampleBean(extractID, "Q_BIOLOGICAL_SAMPLE", extractID,
               fillMetadata(header, row, meta, extractFactors, loci, "Q_BIOLOGICAL_SAMPLE"));
           eSample.addProperty("Q_PRIMARY_TISSUE", tissue);
           order.get(1).add(eSample);
           extractIDToSample.put(extractID, eSample);
-          eSample.addParent(sourceID);
+          eSample.addParentID(sourceID);
 
         }
         if (!sourceIDToSample.containsKey(sourceID)) {
-          sampleID++;
-          sSample = new TSVSampleBean(Integer.toString(sampleID), "Q_BIOLOGICAL_ENTITY", sourceID,
+          // sampleID++;
+          sSample = new TSVSampleBean(sourceID, "Q_BIOLOGICAL_ENTITY", sourceID,
               fillMetadata(header, row, meta, entityFactors, loci, "Q_BIOLOGICAL_ENTITY"));
           sSample.addProperty("Q_NCBI_ORGANISM", species);
           roots.add(sSample);
           order.get(0).add(sSample);
           sourceIDToSample.put(sourceID, sSample);
         }
-        createGraphSummariesForRow(
-            new ArrayList<TSVSampleBean>(Arrays.asList(sourceIDToSample.get(sourceID),
-                extractIDToSample.get(extractID), analyteIDToSample.get(analyteID))),
-            new Integer(rowID));
+        if (parseGraph) {
+          createGraphSummariesForRow(
+              new ArrayList<TSVSampleBean>(Arrays.asList(sourceIDToSample.get(sourceID),
+                  extractIDToSample.get(extractID), analyteIDToSample.get(analyteID))),
+              new Integer(rowID));
+        }
       }
       // }
     }

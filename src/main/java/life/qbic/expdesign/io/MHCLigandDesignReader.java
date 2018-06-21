@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +24,6 @@ import life.qbic.datamodel.ms.MSRunCollection;
 import life.qbic.datamodel.samples.ISampleBean;
 import life.qbic.datamodel.samples.SampleSummary;
 import life.qbic.datamodel.samples.TSVSampleBean;
-import life.qbic.expdesign.SamplePreparator;
-import life.qbic.expdesign.model.ExperimentalDesignType;
 import life.qbic.xml.properties.Unit;
 
 public class MHCLigandDesignReader implements IExperimentalDesignReader {
@@ -162,7 +159,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
    * @return ArrayList of TSVSampleBeans
    * @throws IOException
    */
-  public List<ISampleBean> readSamples(File file) throws IOException {
+  public List<ISampleBean> readSamples(File file, boolean parseGraph) throws IOException {
     tsvByRows = new ArrayList<String>();
 
     BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -335,7 +332,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
           String bloodID = sourceID + "_blood";
           TSVSampleBean blood = new TSVSampleBean(Integer.toString(sampleID), "Q_BIOLOGICAL_SAMPLE",
               bloodID, new HashMap<String, Object>());
-          blood.addParent(sourceID);
+          blood.addParentID(sourceID);
           blood.addProperty("Q_PRIMARY_TISSUE", "Blood plasma");
           blood.addProperty("Q_EXTERNALDB_ID", bloodID);
           tissueSet.add("Blood plasma");
@@ -343,7 +340,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
           sampleID++;
           TSVSampleBean dna = new TSVSampleBean(Integer.toString(sampleID), "Q_TEST_SAMPLE",
               sourceID + "_DNA", new HashMap<String, Object>());
-          dna.addParent(bloodID);
+          dna.addParentID(bloodID);
           dna.addProperty("Q_SAMPLE_TYPE", "DNA");
           dna.addProperty("MHC_I", parseMHCClass(mhcTypes, 1));
           dna.addProperty("MHC_II", parseMHCClass(mhcTypes, 2));
@@ -358,7 +355,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
           tissueSample = new TSVSampleBean(Integer.toString(sampleID), "Q_BIOLOGICAL_SAMPLE",
               extractID, fillMetadata(header, row, meta, factors, loci, "Q_BIOLOGICAL_SAMPLE"));
           order.get(1).add(tissueSample);
-          tissueSample.addParent(sourceID);
+          tissueSample.addParentID(sourceID);
           tissueSample.addProperty("Q_EXTERNALDB_ID", extractID);
           tissueToSample.put(extractID, tissueSample);
 
@@ -367,7 +364,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
               new TSVSampleBean(Integer.toString(sampleID), "Q_TEST_SAMPLE", prepID,
                   fillMetadata(header, row, meta, factors, loci, "Q_TEST_SAMPLE"));
           order.get(2).add(analyteSample);
-          analyteSample.addParent(extractID);
+          analyteSample.addParentID(extractID);
           analyteSample.addProperty("Q_EXTERNALDB_ID", prepID);
           analyteToSample.put(prepID, tissueSample);
           analyteSample.addProperty("Q_SAMPLE_TYPE", "CELL_LYSATE");
@@ -390,7 +387,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
           if (mhcClass.length == 1) {
             ligandExtract.addProperty("Q_MHC_CLASS", mhcClass[0]);
           }
-          ligandExtract.addParent(prepID);
+          ligandExtract.addParentID(prepID);
           ligandExtract.addProperty("Q_EXTERNALDB_ID", ligandExtrID);
           order.get(3).add(ligandExtract);
           analyteToSample.put(ligandExtrID, ligandExtract);
@@ -416,7 +413,7 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
           // and ms run date are the same?
           msIDToMSExp.put(msRuns,
               parseMSExperimentData(row, headerMapping, new HashMap<String, Object>()));
-        msRun.addParent(ligandExtrID);
+        msRun.addParentID(ligandExtrID);
         msRun.addProperty("File", fName);
 
         msRun.addProperty("Q_PROPERTIES",
@@ -699,6 +696,12 @@ public class MHCLigandDesignReader implements IExperimentalDesignReader {
   @Override
   public Map<String, List<SampleSummary>> getSampleGraphNodes() {
     return null;
+  }
+
+  @Override
+  public int countEntities(File file) throws IOException {
+    // TODO Auto-generated method stub
+    return 0;
   }
 
 }

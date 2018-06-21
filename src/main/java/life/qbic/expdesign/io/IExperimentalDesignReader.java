@@ -13,7 +13,7 @@ import life.qbic.datamodel.samples.SampleSummary;
 
 public interface IExperimentalDesignReader {
 
-  List<ISampleBean> readSamples(File file) throws IOException, JAXBException;
+  List<ISampleBean> readSamples(File file, boolean parseGraph) throws IOException, JAXBException;
 
   String getError();
 
@@ -25,5 +25,7 @@ public interface IExperimentalDesignReader {
   List<String> getTSVByRows();
 
   Map<String, List<SampleSummary>> getSampleGraphNodes();
+
+  int countEntities(File file) throws IOException;
 
 }
