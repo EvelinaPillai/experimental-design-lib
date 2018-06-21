@@ -236,7 +236,9 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 			String code = row[mapping.get(0)];
 			// Checksum is generated and added here if not there already
 			code = checkOrAddChecksum(code);
-			if (!SampleCodeFunctions.isQbicBarcode(code) && !isEntity(code) && !isMeasurementBarcode(code)) {
+			//TODO check if ok
+			//if (!SampleCodeFunctions.isQbicBarcode(code) && !isEntity(code) && !isMeasurementBarcode(code)) {
+			if (!SampleCodeFunctions.isCFHcode(code) && !isEntity(code) && !isMeasurementBarcode(code)) {
 				if (isSpecialBarcode(code)) {
 					special = true;
 				} else {
@@ -290,13 +292,13 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 	}
 
 	private String checkOrAddChecksum(String code) {
-		if (code.length() < 9 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code) || isSpecialBarcode(code)
+		if (code.length() < 11 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code) || isSpecialBarcode(code)
 				|| isMeasurementBarcode(code))
 			return code;
-		if (code.length() == 9)
+		if (code.length() == 11)
 			return code + SampleCodeFunctions.checksum(code);
 		else {
-			String main = code.substring(code.length() - 9);
+			String main = code.substring(code.length() - 11);
 			String prefix = code.replace(main, "");
 			return prefix + main + SampleCodeFunctions.checksum(code);
 		}
@@ -398,20 +400,26 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 		return true;
 	}
 
+	//TODO check if everything is fine
 	private static boolean isEntity(String code) {
-		String pattern = "Q[A-Z0-9]{4}ENTITY-[0-9]+";
+		//String pattern = "Q[A-Z0-9]{4}ENTITY-[0-9]+";
+		String pattern = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}ENTITY-[0-9]+";
 		return code.matches(pattern);
 	}
 
+	//TODO see when this is used 
 	private boolean isMeasurementBarcode(String code) {
 		String pattern3 = "VC[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}";
 		String pattern4 = "MS[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}";
+		
 		return code.matches(pattern3) || code.matches(pattern4);
 	}
 
 	private boolean isSpecialBarcode(String code) {
-		String pattern1 = "Q[A-X0-9]{4}000";
-		String pattern2 = "Q[A-X0-9]{4}E[1-9][0-9]*-000";
+		//String pattern1 = "Q[A-X0-9]{4}000";
+		//String pattern2 = "Q[A-X0-9]{4}E[1-9][0-9]*-000";
+		String pattern1 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}000";
+		String pattern2 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}E[1-9][0-9]*-000";
 		return code.matches(pattern1) || code.matches(pattern2);
 	}
 
