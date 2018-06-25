@@ -235,11 +235,14 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       boolean special = false;
       String code = row[mapping.get(0)];
       // Checksum is generated and added here if not there already
+      System.out.println("Raw:" + row );
       code = checkOrAddChecksum(code);
       if (!SampleCodeFunctions.isQbicBarcode(code) && !isEntity(code)
           && !isMeasurementBarcode(code)) {
         if (isSpecialBarcode(code)) {
           special = true;
+          System.out.println("Special:" + special );
+          
         } else {
           error = code + " is not a valid barcode!";
           return null;
@@ -248,7 +251,8 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       if (!special) {
         String sampleSpace = row[mapping.get(1)];
         // project code consists of the first 5 characters of the experiment
-        String sampleProject = row[mapping.get(2)].substring(0, 5);
+        String sampleProject = row[mapping.get(2)].substring(0, 15);
+        System.out.println("NOT SPECIAL " + sampleProject);
         String exp = row[mapping.get(2)];
         if (space.isEmpty() && project.isEmpty()) {
           space = sampleSpace;
@@ -291,14 +295,18 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
   }
 
   private String checkOrAddChecksum(String code) {
-    if (code.length() < 9 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code)
+    if (code.length() < 20 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code)
         || isSpecialBarcode(code) || isMeasurementBarcode(code))
-      return code;
-    if (code.length() == 9)
-      return code + SampleCodeFunctions.checksum(code);
+    	{System.out.println("Checksum code1 " + code);
+      return code;}
+    if (code.length() == 20) {
+    	String code1 =code + SampleCodeFunctions.checksum(code);
+    	System.out.println("Checksum code2 == 20 " + code1);
+      return code + SampleCodeFunctions.checksum(code);}
     else {
-      String main = code.substring(code.length() - 9);
+      String main = code.substring(code.length() - 20);
       String prefix = code.replace(main, "");
+      System.out.println("Checksum code3 == 20 " + prefix + main + SampleCodeFunctions.checksum(code));
       return prefix + main + SampleCodeFunctions.checksum(code);
     }
   }
@@ -424,6 +432,7 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 		//String pattern2 = "Q[A-X0-9]{4}E[1-9][0-9]*-000";
 		String pattern1 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}000";
 		String pattern2 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}E[1-9][0-9]*-000";
+		System.out.println("is apecial Barcode:" + code);
 		return code.matches(pattern1) || code.matches(pattern2);
 	}
 
