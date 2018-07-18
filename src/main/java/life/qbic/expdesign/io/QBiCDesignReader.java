@@ -36,7 +36,7 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
   private List<String> mhcSpecials = new ArrayList<String>(Arrays.asList("Q_MHC_CLASS"));
   private List<String> sampleTypesInOrder =
       new ArrayList<String>(Arrays.asList("Q_BIOLOGICAL_ENTITY", "Q_BIOLOGICAL_SAMPLE",
-          "Q_TEST_SAMPLE", "Q_MHC_LIGAND_EXTRACT", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MS_RUN"));
+          "Q_TEST_SAMPLE", "Q_MHC_LIGAND_EXTRACT", "Q_NGS_SINGLE_SAMPLE_RUN", "Q_MS_RUN","Q_CFH_ELEMENTS"));
 
   private String error;
   private String description;
@@ -393,6 +393,13 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
         blacklist.addAll(testMandatory);
         blacklist.addAll(entityMandatory);
         blacklist.addAll(entityMandatory);
+        break;
+      case "Q_CFH_ELEMENTS":
+         blacklist.addAll(extractMandatory);
+         blacklist.addAll(extractSpecials);
+         blacklist.addAll(testMandatory);
+         blacklist.addAll(entityMandatory);
+         blacklist.addAll(entityMandatory); 
     }
     Set<String> cols = metadata.keySet();
     for (String col : cols) {
