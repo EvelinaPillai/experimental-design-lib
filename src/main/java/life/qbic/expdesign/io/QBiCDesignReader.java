@@ -447,10 +447,12 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 		return code.matches(pattern);
 	}
 
-	//TODO see when this is used 
+ 
 	private boolean isMeasurementBarcode(String code) {
-		String pattern3 = "VC[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}";
-		String pattern4 = "MS[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}";
+		//String pattern3 = "VC[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}";  
+		//String pattern4 = "MS[0-9]*Q[A-X0-9]{4}[0-9]{3}[A-X0-9]{2}"; //for ms sample creation
+		String pattern3 = "VC[0-9]*20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}[0-9]{3}[A-X0-9]{2}";
+		String pattern4 = "MS[0-9]*20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}[0-9]{3}[A-X0-9]{2}"; 
 		
 		return code.matches(pattern3) || code.matches(pattern4);
 	}
