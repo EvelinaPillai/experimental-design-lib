@@ -22,6 +22,8 @@ public class VocabularyValidator {
   public String getError() {
     return error;
   }
+  
+  
 
   public boolean validateExperimentMetadata(List<Map<String, Object>> metadataList) {
     for (Map<String, Object> experimentProperties : metadataList) {
@@ -39,4 +41,6 @@ public class VocabularyValidator {
     return true;
   }
 
+  
+  
 }
