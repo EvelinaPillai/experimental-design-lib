@@ -31,6 +31,8 @@ public class SampleSummaryBean {
         put("Q_NGS_SINGLE_SAMPLE_RUN", "Next-Generation Sequencing Run");
         put("Q_MS_RUN", "Mass Spectrometry Run(s)");
         put("Q_MHC_LIGAND_EXTRACT", "MHC Ligand Extracts");
+        put("Q_CFH_ELEMENTS", "Element Analysis");
+        put("Q_CFH_NMINS", "Nmin");
       };
     };
     String sampleContent = "";

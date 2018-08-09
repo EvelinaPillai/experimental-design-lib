@@ -250,7 +250,7 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       }
       if (!special) {
         String sampleSpace = row[mapping.get(1)];
-        // project code consists of the first 5 characters of the experiment
+        // project code consists of the first 15 characters of the experiment
         String sampleProject = row[mapping.get(2)].substring(0, 15);
         System.out.println("NOT SPECIAL " + sampleProject);
         String exp = row[mapping.get(2)];
@@ -297,16 +297,14 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
   private String checkOrAddChecksum(String code) {
     if (code.length() < 20 || SampleCodeFunctions.isQbicBarcode(code) || isEntity(code)
         || isSpecialBarcode(code) || isMeasurementBarcode(code))
-    	{System.out.println("Checksum code1 " + code);
-      return code;}
+    	{
+    	return code;}
     if (code.length() == 20) {
     	String code1 =code + SampleCodeFunctions.checksum(code);
-    	System.out.println("Checksum code2 == 20 " + code1);
-      return code + SampleCodeFunctions.checksum(code);}
+    	return code + SampleCodeFunctions.checksum(code);}
     else {
       String main = code.substring(code.length() - 20);
       String prefix = code.replace(main, "");
-      System.out.println("Checksum code3 == 20 " + prefix + main + SampleCodeFunctions.checksum(code));
       return prefix + main + SampleCodeFunctions.checksum(code);
     }
   }
@@ -440,7 +438,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
     return true;
   }
 
-	//TODO check if everything is fine
 	private static boolean isEntity(String code) {
 		//String pattern = "Q[A-Z0-9]{4}ENTITY-[0-9]+";
 		String pattern = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}ENTITY-[0-9]+";
@@ -462,7 +459,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
 		//String pattern2 = "Q[A-X0-9]{4}E[1-9][0-9]*-000";
 		String pattern1 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}000";
 		String pattern2 = "20[0-9]{2}-[0-9]-[0-9]{4}-[0-9]{3}E[1-9][0-9]*-000";
-		System.out.println("is apecial Barcode:" + code);
 		return code.matches(pattern1) || code.matches(pattern2);
 	}
 
