@@ -393,32 +393,29 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
         blacklist.addAll(entityMandatory);
         break;
       case "Q_CFH_ELEMENTS":
-         blacklist.addAll(extractMandatory);
-         blacklist.addAll(extractSpecials);
-         blacklist.addAll(testMandatory);
-         blacklist.addAll(entityMandatory);
-         blacklist.addAll(entityMandatory);
-         break;
+    	mandatory = testMandatory;
+        blacklist.addAll(entityMandatory);
+        blacklist.addAll(extractSpecials);
+        blacklist.addAll(extractMandatory);
+        break;
       case "Q_CFH_NMINS":
-         blacklist.addAll(extractMandatory);
-         blacklist.addAll(extractSpecials);
-         blacklist.addAll(testMandatory);
-         blacklist.addAll(entityMandatory);
-         blacklist.addAll(entityMandatory);
-         break;
+    	  mandatory = testMandatory;
+          blacklist.addAll(entityMandatory);
+          blacklist.addAll(extractSpecials);
+          blacklist.addAll(extractMandatory);
+          break;
       case "Q_CFH_AAS":
-         blacklist.addAll(extractMandatory);
-         blacklist.addAll(extractSpecials);
-         blacklist.addAll(testMandatory);
-         blacklist.addAll(entityMandatory);
-         blacklist.addAll(entityMandatory);
-         break;
+    	  mandatory = testMandatory;
+          blacklist.addAll(entityMandatory);
+          blacklist.addAll(extractSpecials);
+          blacklist.addAll(extractMandatory);
+          break;
       case "Q_CFH_FATS":
-         blacklist.addAll(extractMandatory);
-         blacklist.addAll(extractSpecials);
-         blacklist.addAll(testMandatory);
-         blacklist.addAll(entityMandatory);
-         blacklist.addAll(entityMandatory);
+    	  mandatory = testMandatory;
+          blacklist.addAll(entityMandatory);
+          blacklist.addAll(extractSpecials);
+          blacklist.addAll(extractMandatory);
+          break;
     }
     Set<String> cols = metadata.keySet();
     for (String col : cols) {
