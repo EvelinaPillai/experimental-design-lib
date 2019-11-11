@@ -447,7 +447,7 @@ public class MSDesignReader implements IExperimentalDesignReader {
       msExperiments.add(map);
     }
     experimentInfos.put("Q_MS_MEASUREMENT", msExperiments);
-System.out.println(expIDToLigandExp.keySet());
+    //System.out.println(expIDToLigandExp.keySet());
     for (List<ISampleBean> level : order)
       beans.addAll(level);
     boolean unique = checkUniqueIDsBetweenSets(speciesSet, tissueSet);

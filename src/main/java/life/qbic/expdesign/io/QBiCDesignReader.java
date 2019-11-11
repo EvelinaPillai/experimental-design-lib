@@ -235,14 +235,11 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
       boolean special = false;
       String code = row[mapping.get(0)];
       // Checksum is generated and added here if not there already
-      System.out.println("Raw:" + row );
       code = checkOrAddChecksum(code);
       if (!SampleCodeFunctions.isQbicBarcode(code) && !isEntity(code)
           && !isMeasurementBarcode(code)) {
         if (isSpecialBarcode(code)) {
-          special = true;
-          System.out.println("Special:" + special );
-          
+          special = true;        
         } else {
           error = code + " is not a valid barcode!";
           return null;
@@ -252,7 +249,6 @@ public class QBiCDesignReader implements IExperimentalDesignReader {
         String sampleSpace = row[mapping.get(1)];
         // project code consists of the first 15 characters of the experiment
         String sampleProject = row[mapping.get(2)].substring(0, 15);
-        System.out.println("NOT SPECIAL " + sampleProject);
         String exp = row[mapping.get(2)];
         if (space.isEmpty() && project.isEmpty()) {
           space = sampleSpace;
