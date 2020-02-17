@@ -33,6 +33,7 @@ public class SampleSummaryBean {
         put("Q_MHC_LIGAND_EXTRACT", "MHC Ligand Extracts");
         put("Q_CFH_ELEMENTS", "Element Analysis");
         put("Q_CFH_NMINS", "Nmin");
+        put("Q_CFH_NMR_RUN", "NMR");
       };
     };
     String sampleContent = "";
